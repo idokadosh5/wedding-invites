@@ -19,7 +19,7 @@ def send():
     to = data['to']  # WhatsApp number like 'whatsapp:+972501234567'
     name = data.get('name', 'Guest')
 
-    body = f"Hello {name}, שלום רב, בבקשה אשר את ההזמנה לחתונה של ליאל ועידוא ב14.9 באולם נסיה וכמה אנשים יגיעו?"
+    body = f"שלום {name}, שלום רב, בבקשה אשר את ההזמנה לחתונה של ליאל ועידוא ב14.9 באולם נסיה וכמה אנשים יגיעו?"
 
     message = client.messages.create(
         from_=TWILIO_PHONE,
@@ -29,17 +29,24 @@ def send():
     return {"sid": message.sid}, 200
 
 # Webhook route to receive replies
+# Webhook route to receive replies
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    sender = request.form.get("From")
+    sender = request.form.get("From")  # e.g., 'whatsapp:+972546255866'
     msg = request.form.get("Body")
-
+    
+    # Extract phone number from sender (remove whatsapp: prefix)
+    phone_number = sender.replace('whatsapp:', '') if sender.startswith('whatsapp:') else sender
+    
     # Extract number from reply
     match = re.search(r'\b\d+\b', msg)
     count = int(match.group()) if match else 1
-
-    print(f"{sender} is bringing {count} guest(s). Message: {msg}")
-
+    
+    print(f"Phone: {phone_number} is bringing {count} guest(s). Message: {msg}")
+    
+    # Send confirmation message back to user
+    confirmation_msg = f"תודה לך על האישור מחכים לחגוג יחד {count} guest(s). "
+    
     try:
         client.messages.create(
             from_=TWILIO_PHONE,
