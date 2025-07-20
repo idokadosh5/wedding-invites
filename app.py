@@ -19,7 +19,7 @@ def send():
     to = data['to']  # WhatsApp number like 'whatsapp:+972501234567'
     name = data.get('name', 'Guest')
 
-    body = f"Hello {name}, please confirm your attendance to the wedding. How many people will be coming?"
+    body = f"Hello {name}, שלום רב, בבקשה אשר את ההזמנה לחתונה של ליאל ועידוא ב14.9 באולם נסיה וכמה אנשים יגיעו?"
 
     message = client.messages.create(
         from_=TWILIO_PHONE,
@@ -40,4 +40,14 @@ def webhook():
 
     print(f"{sender} is bringing {count} guest(s). Message: {msg}")
 
-    return "Thank you for confirming!", 200
+    try:
+        client.messages.create(
+            from_=TWILIO_PHONE,
+            to=sender,  # Reply to the same number that sent the message
+            body=confirmation_msg
+        )
+        print(f"Confirmation sent to {phone_number}")
+    except Exception as e:
+        print(f"Failed to send confirmation to {phone_number}: {e}")
+    
+    return "OK", 200
